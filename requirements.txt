@@ -1,0 +1,4 @@
+foundry-local-sdk
+sentence-transformers
+numpy
+# Sürümleri sabitlemek için: pip freeze > requirements.txt
