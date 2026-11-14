@@ -39,6 +39,8 @@ pip install -r requirements.txt
 
 İlk çalıştırmada embedding modeli HuggingFace'ten, LLM Foundry Local üzerinden indirilir. Sonrasında internet gerekmez.
 
+Not: Proje Windows'ta `foundry-local-sdk-winml` paketiyle geliştirildi. Başka işletim sistemlerinde Foundry Local belgelerindeki uygun SDK paketi gerekir.
+
 ## Çalıştırma
 
 1. Dokümanları `source/` klasörüne `.txt` olarak koy. Kayıtlar boş satırla ayrılır; her kaydın ilk satırı soru, kalanı cevaptır.

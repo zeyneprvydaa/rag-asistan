@@ -1,4 +1,6 @@
-foundry-local-sdk
-sentence-transformers
-numpy
-# Sürümleri sabitlemek için: pip freeze > requirements.txt
+# Windows için. Windows dışı sistemlerde Foundry Local belgelerindeki
+# uygun SDK paketini kullan.
+foundry-local-core-winml==1.2.4
+foundry-local-sdk-winml==1.2.4
+numpy==2.5.3
+sentence-transformers==6.1.0
