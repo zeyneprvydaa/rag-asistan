@@ -1,0 +1,109 @@
+What is Microsoft 365 Education?
+Microsoft 365 Education delivers a secure, integrated platform that supports student learning today—while preparing institutions and learners for an AI-powered future.
+
+What is the difference between Office 365 and Microsoft 365 Education?
+Microsoft 365 Education includes Office 365 apps such as Word, Excel, PowerPoint, and Outlook and also brings AI-powered education tools, enhanced management, security, and compliance tools.
+
+What type of data and analytics tools and capabilities does Microsoft 365 Education provide?
+Microsoft 365 Education provides several data and analytics tools:
+- Education Insights: A free, out-of-the-box analytics solution for schools using Teams for Education that automatically connects key apps within Teams and the Microsoft 365 graph to make student data easy to access for teachers and education leaders.
+- Reflect: Helps students recognize and navigate their emotions by providing regular opportunities to share and be heard, broadening emotional vocabulary, deepening peer empathy, and providing valuable feedback to educators.
+- School Data Sync (SDS): A Microsoft 365 Education application for EDU tenants that connects with external 3rd-party systems (typically student information systems—SIS) to ingest and store data for dynamic Microsoft 365 provisioning and enriched insights and analytics.
+- Azure Data Export: Allows exporting data from SDS and Education Insights (including Reflect, Assignments, and Progress/Coach data) into an Azure or 3rd-party data repository (requires Education Insights Premium).
+- Open Education Analytics (OEA): An open-source effort led by Microsoft Education to empower education systems worldwide to use data, analytics, and AI more effectively and ethically to improve learning outcomes, offering models via GitHub for advanced predictive analytics.
+
+How much does Microsoft 365 Education cost?
+There are three tiers of Microsoft 365 Education available, each with an array of helpful and inclusively designed features. Institutions can connect with Microsoft education experts or a sales partner to learn more about pricing and build an individualized plan.
+
+What version of Microsoft 365 Education is right for my institution?
+There are three versions of Microsoft 365 Education to choose from:
+- A1: A simple, one-time-per-device learning solution for modern workloads with desktop apps like Word, Excel, PowerPoint, Microsoft Teams, and Minecraft: Education Edition, plus cloud management via Microsoft Intune for Education.
+- A3: Enhances learning with desktop Office apps and increased security and management tools, including everything in A1 plus features like Bookings, Live Events, and advanced security, management, and analytics.
+- A5: Streamlines licensing and reduces costs with the most comprehensive suite of learning, compliance, security, and management tools, including all teaching and learning features of Microsoft 365 A3.
+
+What languages are supported for your accessibility tools? What languages are supported for Reading Progress and Reading Coach?
+Microsoft accessibility tools are available in over 81 languages to support ELL, non-native speakers, deaf learners, and those with auditory processing disorders or cognitive differences. PowerPoint Live provides real-time translation in over 100 languages, and both Reading Progress and Reading Coach are supported in over 100 languages.
+
+What makes Learning Accelerators different from Google's Practice Sets?
+Learning Accelerators differ in two main areas:
+- Pricing: Learning Accelerators is a set of free tools available with an Office 365 A1 free license, whereas Google Workplace requires a Plus or Teaching & Learning upgrade license.
+- Skills & subjects: Learning Accelerators already support Reading and Search (digital literacy), with plans to launch Math and Speaking (communication) later this school year, whereas it is unclear which subjects beyond math Practice Sets will support.
+
+How does Microsoft support more equitable learning environments?
+Microsoft supports equitable learning environments in all school systems by using safe and trusted first-party solutions that foster inclusivity, enable real-time insights, leverage cloud services, and prepare students for the future. It provides students with inclusively designed solutions, equips educators with tools to accelerate learning and support social-emotional well-being, and offers instructional and IT leaders affordable, secure, scalable, and sustainable hardware and software options.
+
+How does Microsoft 365 Education provide me with a more holistic view of every student?
+Many built-in tools seamlessly integrate with Education Insights, which combines student engagement data from Teams for Education with Assignments, the emotional well-being survey tool Reflect, and Learning Accelerators to give educators and leaders a holistic view of their students in an out-of-the-box solution.
+
+How do I sign in to Microsoft Teams for Education?
+To access Microsoft Teams for Education, click Sign In and enter the email address and password provided by your institution. If your institution is already signed up for Office 365 or Microsoft 365 for Education and has turned on access to Microsoft Teams, or if your institution is an accredited academic institution, you will be able to sign in or sign up. If you are having trouble, please contact your institution's IT administrator.
+
+How do I create class and staff teams?
+You can create class and staff teams in Microsoft Teams for Education in just a few simple steps through the Teams interface by selecting the option to create a class team or a staff team.
+
+How do I create, attend, and run meetings in Microsoft Teams for Education?
+Microsoft provides clear guidance and specific tips for educators, students, and administrators on how to schedule, attend, and manage online meetings in Microsoft Teams for Education.
+
+How do I get support if Microsoft Teams for Education isn't working?
+If Microsoft Teams for Education is not working properly, you can follow the Teams troubleshooting guide, email Office Support with your question, visit the Office Support Center, or ask the Microsoft Education community for assistance.
+
+Where can I propose ideas for new Microsoft Teams for Education features for institutions?
+You can propose new feature ideas and provide feedback on how to improve Microsoft Teams for your classroom and staff through the Teams UserVoice forum.
+
+What control do educators and school IT have for student safety in online meetings?
+Educators and IT administrators have multiple options and controls to keep students safe before, during, and after classes held in online meetings, as well as in student-to-student interactions, detailed in the Teams guide for IT professionals and educators.
+
+Where can I find more professional development and education training resources for Teams?
+You can build your remote and hybrid teaching skills with free online training and resources, including live Stores sessions, professional development training, on-demand content, Teams Educator training, and online Teams training courses.
+
+Where can I learn more about Windows 11 for Education?
+Windows 11 is reimagined for digital learning and digital equity, helping educators unlock the full potential of every student with powerful tools and built-in security features to learn, collaborate, and create. Built to be an AI-ready platform, Windows 11 supports future-ready teaching and learning experiences.
+
+What are the benefits of the Windows 11 upgrade over Windows 10?
+Windows 11 for Education offers new productivity and inclusivity features as well as functionality designed to meet the challenges of the hybrid world, featuring a refreshed look and feel that helps students learn more with less stress.
+
+Will my current Windows 10 applications, software or programs work with Windows 11?
+Yes, most apps and devices that work with Windows 10 are compatible with Windows 11. You can also check with the software manufacturer of a specific application or device to confirm compatibility.
+
+What are the major differences between Windows 11 and Windows 10? Why should I upgrade?
+Compared to Windows 10, Windows 11 incorporates years of hardware innovation, offering enhanced speed and security in a redesigned and refreshed look, along with new tools, sounds, apps, and accessibility features.
+
+What is a Copilot+ PC and what does on-device AI mean?
+Copilot+ PCs are a new class of Windows 11 PCs designed to deliver fast, responsive AI experiences. With on-device AI, certain features can run directly on the PC, helping reduce reliance on the cloud and enabling specific experiences even when offline.
+
+How long can I use this plan?
+You can use the Office 365 Education plan as long as you are working at a qualified school, though your eligibility may be re-verified at any time. When the plan expires:
+- Office applications enter a reduced-functionality mode, meaning you can view documents but cannot edit or create new ones.
+- Online services associated with the school email address, such as Office Online and OneDrive, will no longer work.
+- You can extend your plan by re-verifying your status as an educator or by moving to an Office 365 personal plan.
+
+How long does it take to be approved as a qualified academic institution?
+In many cases, the response time is instantaneous through an automated verification process. Where an institution needs manual verification, it may take up to a month to confirm eligibility. If you are nearing the end of your 30-day trial without approval, you should contact customer support.
+
+Who manages the OneDrive account provided with this offer?
+The OneDrive account is assigned to you but associated with the school and should be used for school-appropriate content. Permissions and access can be changed by the school's IT administrator at any time.
+
+What are the minimum system requirements for Office 365 Education?
+To install Office 365 Education, your PC or Mac must meet the official Microsoft minimum system requirements for installation.
+
+What are the most common device programs for schools and institutions?
+Microsoft offers several device program solutions designed to fit diverse institutional needs:
+- Loaner laptops: Temporary device lending programs for students.
+- Early graduation gifts (Higher Education): Schools allow students to use the laptop while enrolled and transfer ownership upon graduation (if the student leaves the school early, the laptop must be returned).
+- Payment plans (Higher Education): Schools set up installment plans allowing students to gradually pay off the laptop price, gaining ownership upon graduation.
+- Institution, District, or Ministries of Education portals: Schools create their own tech shops offering preferred devices at discounted pricing.
+
+What types of devices are available to meet students' diverse needs?
+Windows devices are suited to every instructor and student, addressing a variety of disciplines, accessibility needs, computing power, and teaching and learning styles. Intuitive, interactive Windows devices with Microsoft Edge empower communication, collaboration, creativity, and critical thinking to prepare students for future careers.
+
+Does Microsoft offer education pricing?
+Yes, education customers can receive discounts on Microsoft 365 subscriptions, which include the latest versions of Microsoft Office, Microsoft Intune for Education, and Windows upgrade rights. Qualifying schools can also receive the lowest pricing on new devices by purchasing models that come with pre-installed versions of Windows 11 Pro Education.
+
+How can I get Microsoft's education pricing?
+To receive Microsoft Education pricing, an institution can purchase an annual license agreement such as Microsoft 365 A3 or A5, which includes the right to upgrade a qualifying Windows operating system to Windows 11 Education. Another option when purchasing a new Windows device through a reseller or directly from a computer manufacturer is to request Windows 11 Pro Education or the Shape the Future Program to guarantee the best pricing on pre-installed Windows 11 for Education devices.
+
+Which laptops and computers do institutions use?
+Institutions can choose from a wide variety of devices from computer manufacturers including Lenovo, Dell, HP, Acer, ASUS, Microsoft Surface, and more.
+
+How can I upgrade my devices to Windows 11?
+To upgrade devices to Windows 11 Education, they must first meet the minimum hardware specifications for eligibility. Eligible devices can be upgraded through Windows Update, similar to standard Windows 10 feature updates. For IT-managed devices, users should check with their school's IT organization for rollout details. Note that a significant download and internet access are required to complete the upgrade, and ISP fees may apply.
