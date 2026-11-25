@@ -1,6 +1,11 @@
 # Yerel RAG Asistanı (Microsoft Foundry Local)
 
-İnternet bağlantısı olmadan, tamamen kendi bilgisayarında çalışan bir soru-cevap asistanı. Bilgi tabanı olarak TEKNOFEST sık sorulan sorular (`source/sss.txt`) kullanılır.
+İnternet bağlantısı olmadan, tamamen kendi bilgisayarında çalışan bir soru-cevap asistanı.
+
+Bilgi tabanı olarak iki sık sorulan sorular kaynağı kullanılır:
+
+- `source/teknofest_faq.txt`: TEKNOFEST (kaynak:https://teknofest.org/tr/kurumsal/sss/, Kasım 2026)
+- `source/microsoft_sss_ing.txt`: Microsoft 365 Education (kaynak:https://www.microsoft.com/en/education/products/frequently-asked-questions, Kasım 2026)
 
 Akış: kullanıcı sorusu → embedding → SQLite'tan en benzer kayıtlar → Foundry Local LLM → cevap
 
@@ -63,7 +68,7 @@ Doküman ya da embedding modeli değişirse 2. adım yeniden çalıştırılmal�
 
 ## Bilinen kısıtlar
 
-- **Küçük bilgi tabanı:** Tek kaynak, 9 soru-cevap kaydı. Arama yöntemi soru-cevap formatına göre ayarlandı; düz paragraf içeren dokümanlarda ayrıca test edilmeli.
+- **Küçük bilgi tabanı:** İki kaynak, toplam 40 soru-cevap kaydı. Arama yöntemi soru-cevap formatına göre ayarlandı; düz paragraf içeren dokümanlarda ayrıca test edilmeli.
 - **Türkçe sorularda arama:** Bilgi tabanı İngilizce olduğu için bazı Türkçe sorularda doğru kayıt 1. sırada gelmeyebilir (örn. "TEKNOFEST'e giriş ücretli mi?" sorusunda 3. sırada). `TOP_K = 3` bunu telafi eder, ama LLM'in doğru kaydı seçmesine bağlıdır.
 - **Küçük LLM:** 2 milyar parametreli model cevaplarda zaman zaman tutarsız olabilir (örn. cevabın başına gereksiz "Yes" eklemesi; kod bunu temizler).
 - **Eşik sınırı:** Eşik yalnızca konu dışı soruları eler. Konuyla ilgili ama cevabı bilgi tabanında olmayan sorularda ret kararını LLM verir.
