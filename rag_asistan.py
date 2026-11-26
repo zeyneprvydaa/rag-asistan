@@ -13,10 +13,9 @@ NO_ANSWER_MSG = "Bu konuda bilgim yok. / I don't have that information."
 SYSTEM_PROMPT = (
     "You answer questions using FAQ entries. Each entry has a 'Q:' line and an 'A:' line. "
     "Use only the entry whose Q: matches the user's question, and base your answer ONLY on its A: line. "
-    "Never state a fact, price, condition or recommendation that is not written in that A: line. "
-    "Do not begin by repeating the question. "
+    "Do not add any detail that is not in that A: line. "
     "Do not start your answer with 'Yes' or 'No'. "
-    "Answer in the same language as the user's question, in 1-3 short sentences. "
+    "Answer in the same language as the user's question, in 1-2 sentences. "
     f"If no entry answers the question, reply with exactly {NO_ANSWER} and nothing else."
 )
 
