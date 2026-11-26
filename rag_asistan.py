@@ -13,9 +13,10 @@ NO_ANSWER_MSG = "Bu konuda bilgim yok. / I don't have that information."
 SYSTEM_PROMPT = (
     "You answer questions using FAQ entries. Each entry has a 'Q:' line and an 'A:' line. "
     "Use only the entry whose Q: matches the user's question, and base your answer ONLY on its A: line. "
-    "Do not add any detail that is not in that A: line. "
+    "Never state a fact, price, condition or recommendation that is not written in that A: line. "
+    "Do not begin by repeating the question. "
     "Do not start your answer with 'Yes' or 'No'. "
-    "Answer in the same language as the user's question, in 1-2 sentences. "
+    "Answer in the same language as the user's question, in 1-3 short sentences. "
     f"If no entry answers the question, reply with exactly {NO_ANSWER} and nothing else."
 )
 
@@ -50,6 +51,9 @@ def answer(client, question, hits):
     text = re.sub(r"<think>.*?</think>", "", out, flags=re.S).strip()
     # Model cevap + NO_ANSWER karışık yazarsa kelimeyi at, cevabı koru
     text = text.replace(NO_ANSWER, "").strip()
+    # Model kaynaktaki Q:/A: etiketlerini kopyalarsa temizle
+    text = re.sub(r"^\s*Q:[^\n]*\n", "", text)
+    text = re.sub(r"^\s*A:\s*", "", text)
     # "Yes, there is no..." gibi çelişkili girişleri baştan at
     stripped = re.sub(r"^(yes|no|evet|hayır)\s*[,.:;-]\s*", "", text, flags=re.I)
     if stripped:
@@ -83,7 +87,13 @@ def main():
 
             for s, c, sc in hits:
                 print(f"  -> ({s}, {sc:.3f}) {c.splitlines()[0]}")
-            print(f"\nCevap: {answer(client, q, hits)}")
+
+            try:
+                reply = answer(client, q, hits)
+            except Exception as e:  # noqa: BLE001
+                reply = f"Cevap üretilemedi ({type(e).__name__}). Lütfen tekrar dene."
+            print(f"\nCevap: {reply}")
+
             for _, c, sc in hits:
                 print(f"Kaynak ({sc:.3f}): {c.split(chr(10), 1)[-1]}")
             print()
