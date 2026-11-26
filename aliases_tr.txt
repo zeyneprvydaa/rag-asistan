@@ -1,0 +1,47 @@
+# Biçim: İngilizce soru (kaydın ilk satırı, birebir) || Türkçe soru 1 || Türkçe soru 2 ...
+# Yalnızca o kaydın gerçekten cevapladığı sorular yazılır.
+# Bu dosya proje ana klasöründe durur, source/ klasörüne KONMAZ.
+
+# --- TEKNOFEST ---
+What is the National Technology Initiative? || Milli Teknoloji Hamlesi nedir? || Milli Teknoloji Hamlesi ne demek?
+What is TEKNOFEST Aerospace and Technology Festival? || TEKNOFEST Havacılık, Uzay ve Teknoloji Festivali nedir? || TEKNOFEST nedir?
+What is the primary objective of TEKNOFEST? || TEKNOFEST'in amacı nedir? || TEKNOFEST'in temel hedefi nedir?
+Which fields does TEKNOFEST cover? || TEKNOFEST hangi alanları kapsıyor? || TEKNOFEST'te hangi konular var?
+When is TEKNOFEST held? || TEKNOFEST ne zaman yapılır? || TEKNOFEST hangi tarihlerde düzenlenir?
+Is there an admission fee for the festival? || Festivale giriş ücretli mi? || TEKNOFEST'e giriş ücretli mi? || Giriş ücreti var mı?
+How can I attend TEKNOFEST as a visitor? || TEKNOFEST'e ziyaretçi olarak nasıl katılırım? || Festivale nasıl girebilirim? || Ziyaretçi kaydı nasıl yapılır?
+How is material support provided for projects? || Projelere maddi destek nasıl sağlanıyor? || Takımlara maddi destek veriliyor mu? || Ulaşım ve konaklama desteği var mı?
+Where can I access report templates? || Rapor şablonlarına nereden ulaşabilirim? || Rapor şablonlarını nereden indirebilirim?
+
+# --- Microsoft 365 Education ---
+What is Microsoft 365 Education? || Microsoft 365 Education nedir?
+What is the difference between Office 365 and Microsoft 365 Education? || Office 365 ile Microsoft 365 Education arasındaki fark nedir?
+What type of data and analytics tools and capabilities does Microsoft 365 Education provide? || Microsoft 365 Education hangi veri ve analiz araçlarını sunuyor? || Education Insights nedir?
+How much does Microsoft 365 Education cost? || Microsoft 365 Education ne kadar? || Microsoft 365 Education kaç para? || Microsoft 365 Education fiyatı nedir?
+What version of Microsoft 365 Education is right for my institution? || Kurumum için hangi Microsoft 365 Education sürümü uygun? || A1, A3 ve A5 arasındaki fark nedir? || Hangi sürümü seçmeliyim?
+What languages are supported for your accessibility tools? What languages are supported for Reading Progress and Reading Coach? || Erişilebilirlik araçları hangi dilleri destekliyor? || Reading Coach hangi dilleri destekliyor?
+What makes Learning Accelerators different from Google's Practice Sets? || Learning Accelerators, Google Practice Sets'ten nasıl farklı?
+How does Microsoft support more equitable learning environments? || Microsoft eşitlikçi öğrenme ortamlarını nasıl destekliyor?
+How does Microsoft 365 Education provide me with a more holistic view of every student? || Microsoft 365 Education her öğrenci hakkında nasıl bütüncül bir görünüm sağlıyor?
+How do I sign in to Microsoft Teams for Education? || Teams'e nasıl giriş yaparım? || Microsoft Teams for Education'a nasıl giriş yapılır?
+How do I create class and staff teams? || Sınıf ve personel ekipleri nasıl oluşturulur?
+How do I create, attend, and run meetings in Microsoft Teams for Education? || Teams'te toplantı nasıl oluşturulur ve yönetilir?
+How do I get support if Microsoft Teams for Education isn't working? || Teams çalışmazsa nereden destek alabilirim?
+Where can I propose ideas for new Microsoft Teams for Education features for institutions? || Teams için yeni özellik fikirlerini nereden önerebilirim?
+What control do educators and school IT have for student safety in online meetings? || Çevrimiçi toplantılarda öğrenci güvenliği için öğretmenlerin ve BT yöneticilerinin hangi kontrolleri var?
+Where can I find more professional development and education training resources for Teams? || Teams için mesleki gelişim ve eğitim kaynaklarını nerede bulabilirim?
+Where can I learn more about Windows 11 for Education? || Windows 11 for Education hakkında daha fazla bilgiyi nereden öğrenebilirim?
+What are the benefits of the Windows 11 upgrade over Windows 10? || Windows 11'e geçmenin Windows 10'a göre faydaları nelerdir?
+Will my current Windows 10 applications, software or programs work with Windows 11? || Windows 10 uygulamalarım Windows 11'de çalışır mı?
+What are the major differences between Windows 11 and Windows 10? Why should I upgrade? || Windows 11 ile Windows 10 arasındaki farklar nelerdir? || Windows 11'e geçmeli miyim? || Windows 11'e neden yükseltmeliyim?
+What is a Copilot+ PC and what does on-device AI mean? || Copilot+ PC nedir? || Cihaz üzerinde yapay zeka ne demek?
+How long can I use this plan? || Bu planı ne kadar süre kullanabilirim? || Office 365 Education planını ne kadar süre kullanabilirim?
+How long does it take to be approved as a qualified academic institution? || Okulun onaylanması ne kadar sürer? || Uygun eğitim kurumu olarak onay ne kadar sürer?
+Who manages the OneDrive account provided with this offer? || OneDrive hesabını kim yönetir?
+What are the minimum system requirements for Office 365 Education? || Office 365 Education için minimum sistem gereksinimleri nelerdir?
+What are the most common device programs for schools and institutions? || Okullar için en yaygın cihaz programları nelerdir? || Ödünç laptop programı nedir?
+What types of devices are available to meet students' diverse needs? || Öğrencilerin farklı ihtiyaçları için hangi cihaz türleri mevcut?
+Does Microsoft offer education pricing? || Microsoft eğitim fiyatlandırması sunuyor mu? || Eğitim indirimi var mı?
+How can I get Microsoft's education pricing? || Microsoft eğitim fiyatlarını nasıl alabilirim?
+Which laptops and computers do institutions use? || Kurumlar hangi dizüstü ve bilgisayarları kullanıyor?
+How can I upgrade my devices to Windows 11? || Cihazlarımı Windows 11'e nasıl yükseltirim? || Windows 11'e nasıl yükseltirim?
