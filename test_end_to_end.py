@@ -1,4 +1,4 @@
-"""Uçtan uca değerlendirme: retrieval + ön kontrol + LLM cevabı, degerlendirme.md üretir.
+"""Uçtan uca değerlendirme: retrieval + ön kontrol + LLM cevabı, evaluation.md üretir.
 
 Çalıştırma:  python test_end_to_end.py
 
@@ -10,15 +10,7 @@ import time
 from sentence_transformers import SentenceTransformer
 
 from config import BASE_DIR, EMBED_MODEL_NAME, LLM_ALIAS, THRESHOLD, TOP_K, W_QUESTION
-from rag_asistan import (
-    NO_ANSWER_MSG,
-    SCORE_MARGIN,
-    USE_JUDGE,
-    answer,
-    chunk_answers,
-    load_llm,
-    needs_check,
-)
+from assistant import SCORE_MARGIN, USE_PRECHECK, load_llm, respond
 from retriever import Retriever
 
 # (soru, cevapta geçmesi beklenen anahtar kelimelerden herhangi biri; None = reddedilmeli)
@@ -59,6 +51,9 @@ TESTS = [
     ("What is the capital of France?", None),
     ("Bugün hava nasıl?", None),
     ("Python nedir?", None),
+    # --- Edge cases: very general input ---
+    ("Merhaba", None),
+    ("Bu nedir?", None),
 ]
 
 # Elle değerlendirme (çalıştırdıktan sonra cevapları okuyup doldur), örnek:
@@ -96,6 +91,8 @@ MANUAL = {
     "What is the capital of France?": "✅ Eşikte reddedildi",
     "Bugün hava nasıl?": "✅ Eşikte reddedildi",
     "Python nedir?": "✅ Eşikte reddedildi",
+    "Merhaba": "✅ Eşikte reddedildi",
+    "Bu nedir?": "✅ Eşikte reddedildi (skor 0.801, eşik 0.82)",
 }
 
 REFUSAL_MARKERS = [
@@ -115,19 +112,6 @@ def cell(text):
     return text.replace("\n", " ").replace("|", "/").strip()
 
 
-def respond(retriever, client, q):
-    """rag_asistan.py'deki akışın aynısı. Döner: (en iyi skor, cevap metni, reddedildi mi?)"""
-    results = retriever.search(q)
-    top_score = results[0][2]
-    hits = [h for h in results if h[2] >= THRESHOLD]
-    if not hits:
-        return top_score, "Bilgi tabanında yeterli bilgi yok. (eşikte reddedildi)", True
-    hits = [h for h in hits if h[2] >= hits[0][2] - SCORE_MARGIN]
-    if USE_JUDGE and needs_check(q) and not chunk_answers(client, q, hits[0][1]):
-        return top_score, NO_ANSWER_MSG + " (ön kontrolde reddedildi)", True
-    return top_score, answer(client, q, hits), False
-
-
 def main():
     print("Modeller yükleniyor...")
     retriever = Retriever(SentenceTransformer(EMBED_MODEL_NAME))
@@ -138,11 +122,15 @@ def main():
     try:
         for q, keywords in TESTS:
             t = time.perf_counter()
-            try:
-                top_score, reply, refused = respond(retriever, client, q)
-            except Exception as e:
-                top_score, reply, refused = 0.0, f"HATA: {e}", False
+            result = respond(retriever, client, q)
             sec = time.perf_counter() - t
+            top_score = result.top_score
+            refused = result.status in ("threshold", "precheck")
+            reply = result.reply
+            if result.status == "threshold":
+                reply += " (eşikte reddedildi)"
+            elif result.status == "precheck":
+                reply += " (ön kontrolde reddedildi)"
 
             if keywords is None:
                 ok = refused or is_refusal(reply)
@@ -165,7 +153,7 @@ def main():
         f"- LLM: `{LLM_ALIAS}`",
         f"- Embedding: `{EMBED_MODEL_NAME}`",
         f"- Ayarlar: W_QUESTION={W_QUESTION}, THRESHOLD={THRESHOLD}, TOP_K={TOP_K}, "
-        f"SCORE_MARGIN={SCORE_MARGIN}, USE_JUDGE={USE_JUDGE}, Türkçe takma adlar: açık",
+        f"SCORE_MARGIN={SCORE_MARGIN}, USE_PRECHECK={USE_PRECHECK}, Türkçe takma adlar: açık",
         f"- Otomatik kontrol (anahtar kelime): **{passed}/{len(TESTS)}**",
         f"- Ortalama süre: {avg:.1f} sn/soru",
         "",
@@ -178,7 +166,7 @@ def main():
             f"{cell(MANUAL.get(q, '—'))} |"
         )
 
-    out = BASE_DIR / "degerlendirme.md"
+    out = BASE_DIR / "evaluation.md"
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"\nSonuç: {passed}/{len(TESTS)}  |  ortalama {avg:.1f} sn/soru")
     print(f"Tablo kaydedildi: {out}")

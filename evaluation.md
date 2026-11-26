@@ -2,13 +2,13 @@
 
 - LLM: `qwen3.5-2b`
 - Embedding: `intfloat/multilingual-e5-base`
-- Ayarlar: W_QUESTION=0.6, THRESHOLD=0.8, TOP_K=3, SCORE_MARGIN=0.03, USE_JUDGE=True, Türkçe takma adlar: açık
-- Otomatik kontrol (anahtar kelime): **31/32**
-- Ortalama süre: 0.8 sn/soru
+- Ayarlar: W_QUESTION=0.6, THRESHOLD=0.82, TOP_K=3, SCORE_MARGIN=0.03, USE_PRECHECK=True, Türkçe takma adlar: açık
+- Otomatik kontrol (anahtar kelime): **33/34**
+- Ortalama süre: 0.7 sn/soru
 
 | # | Soru | Beklenen | En iyi skor | Gelen cevap | Süre (sn) | Otomatik | Elle değerlendirme |
 |---|---|---|---|---|---|---|---|
-| 1 | TEKNOFEST nedir? | Cevap: festival / havacılık / aerospace | 0.964 | TEKNOFEST, teknofest nedir? TEKNOFEST, dünyanın en büyük havacılık, uzay ve teknoloji festivalidir. | 1.5 | ✅ | ⚠️ Doğru bilgi, ama cevap soruyu tekrarlayarak başlıyor |
+| 1 | TEKNOFEST nedir? | Cevap: festival / havacılık / aerospace | 0.964 | TEKNOFEST, teknofest nedir? TEKNOFEST, dünyanın en büyük havacılık, uzay ve teknoloji festivalidir. | 1.4 | ✅ | ⚠️ Doğru bilgi, ama cevap soruyu tekrarlayarak başlıyor |
 | 2 | What is TEKNOFEST? | Cevap: festival / aerospace / largest | 0.940 | TEKNOFEST is the world's largest aerospace, space, and technology festival, organized with the participation of institutions and organizations that contribute to the development of national technology in Turkey. | 1.0 | ✅ | ✅ Doğru, kaynakla birebir |
 | 3 | TEKNOFEST'e giriş ücretli mi? | Cevap: ücretsiz / değildir / free | 0.956 | TEKNOFEST'e giriş ücretli değildir. | 0.5 | ✅ | ✅ Doğru |
 | 4 | Is there an admission fee for the festival? | Cevap: no admission / free / no fee | 0.949 | There is no admission fee for the festival. Participation in TEKNOFEST as a visitor is completely free of charge. | 0.7 | ✅ | ✅ Doğru |
@@ -16,7 +16,7 @@
 | 6 | TEKNOFEST'e ziyaretçi olarak nasıl katılırım? | Cevap: kayıt / qr / registration | 0.953 | TEKNOFEST'e katılmak için festival öncesi resmi web sitesinden veya mobil uygulamadan online kayıt olmanız gerekir. Kayıt sırasında oluşturulan QR kodu ile giriş yapmanız yeterlidir. | 1.0 | ✅ | ✅ Doğru |
 | 7 | TEKNOFEST hangi alanları kapsıyor? | Cevap: yapay zeka / artificial intelligence / havacılık | 0.949 | TEKNOFEST, teknoloji ve bilimin birçok alanını kapsar, özellikle havacılık ve uzay, yapay zeka, yazılım, robotik sistemler, enerji, çeviklik, tarım, sağlık ve deniz teknolojileri gibi alanlarda. | 1.3 | ✅ | ⚠️ Kapsam doğru; çeviri hatası: 'environment' yerine 'çeviklik' |
 | 8 | Rapor şablonlarını nereden indirebilirim? | Cevap: şartname / belge / specification | 0.925 | Rapor şablonlarını, ilgili yarışmanın "Sınavlar ve Belgeler" sayfasından indirebilirsiniz. | 0.7 | ✅ | ⚠️ Sayfa adı yanlış çevrilmiş ('Sınavlar ve Belgeler') |
-| 9 | Milli Teknoloji Hamlesi nedir? | Cevap: vizyon / kalkınma / vision | 0.933 | Milli Teknoloji Hamlesi, Türkiye'nin tam bağımsızlığı, gelişmiş ve yüksek teknoloji üretimi hedefi olan kapsamlı bir gelişme vizyonudur. | 0.9 | ✅ | ✅ Doğru |
+| 9 | Milli Teknoloji Hamlesi nedir? | Cevap: vizyon / kalkınma / vision | 0.933 | Milli Teknoloji Hamlesi, Türkiye'nin tam bağımsızlığı, gelişmiş ve yüksek teknoloji üretimi hedefi olan kapsamlı bir gelişme vizyonudur. | 1.0 | ✅ | ✅ Doğru |
 | 10 | Takımlara maddi destek veriliyor mu? | Cevap: destek / ulaşım / konaklama | 0.910 | Takımlara maddi destek veriliyor mu? Evet, pre-evaluation ve final stage'ye geçen takım için material support ve transportation/accommodation facilities verilmektedir. | 0.9 | ✅ | ⚠️ İçerik doğru; Türkçe-İngilizce karışık, soruyu tekrarlıyor |
 | 11 | Ulaşım ve konaklama desteği var mı? | Cevap: ulaşım / konaklama / transportation | 0.917 | Ulaşım ve konaklama desteği var. | 1.1 | ✅ | ✅ Doğru |
 | 12 | Projelere para yardımı yapılıyor mu? | Cevap: destek / support | 0.883 | Projelere destek ve taşıma/kahramanluk konforları sağlanmaktadır. | 0.6 | ✅ | ⚠️ Çeviri hatası ('kahramanluk'), 'finale kalan takımlar' koşulu eksik |
@@ -25,7 +25,7 @@
 | 15 | Microsoft 365 Education kaç para? | Cevap: kademe / üç / three | 0.947 | Bu konuda bilgim yok. / I don't have that information. (ön kontrolde reddedildi) | 0.3 | ❌ | ⚠️ Ön kontrol reddetti; kayıttaki 'üç kademe, satış ortağı' bilgisi verilmedi |
 | 16 | A1, A3 ve A5 arasındaki fark nedir? | Cevap: a1 / a3 / a5 | 0.912 | A1, A3 ve A5 arasındaki farklar, öğrenme çözümlerinin kapsamunda ve özelliklerdeki farklılıklarıyla açıklanır. A1, basit bir öğrenme çözümleridir ve sadece Word, Excel, PowerPoint ve Teams gibi temel uygulamaları içerir. A3, A1'ye ek olarak güvenlik ve yönetim araçlarını da ekleyerek daha fazla öğrenmeyi destekler. A5, A3'ün tüm özelliklerini içerken lisans maliyetlerini en aza indirir ve en kapsamlı öğrenme, uyumluluk, güvenlik ve yönetim çözümleridir. | 2.8 | ✅ | ⚠️ Genel olarak doğru; yazım hatası ('kapsamunda'), kaynakta olmayan 'sadece' ifadesi |
 | 17 | Office 365 ile Microsoft 365 Education arasındaki fark nedir? | Cevap: ai / yapay zeka / güvenlik | 0.958 | Microsoft 365 Education, Office 365 uygulamalarını ve ayrıca AI destekli eğitim araçlarını, yönetimi, güvenlik ve uyumluluk araçlarını da içerir. | 0.9 | ✅ | ✅ Doğru |
-| 18 | Teams'e nasıl giriş yaparım? | Cevap: e-posta / şifre / email | 0.925 | Teams'e nasıl giriş yaparsınız? Okulunuzun e-posta adresini ve şifresini girin. Eğer okulunuz zaten Office 365 veya Microsoft 365 for Education'a bağlıysa ve giriş yapma yetkisi açıkken, giriş yapabilirsiniz. Sorun yaşarsanız, okulunuzun IT yöneticisine başvurunuz. | 1.7 | ✅ | ✅ Doğru (soruyu tekrar ederek başlıyor) |
+| 18 | Teams'e nasıl giriş yaparım? | Cevap: e-posta / şifre / email | 0.925 | Teams'e nasıl giriş yaparsınız? Okulunuzun e-posta adresini ve şifresini girin. Eğer okulunuz zaten Office 365 veya Microsoft 365 for Education'a bağlıysa ve giriş yapma yetkisi açıkken, giriş yapabilirsiniz. Sorun yaşarsanız, okulunuzun IT yöneticisine başvurunuz. | 1.6 | ✅ | ✅ Doğru (soruyu tekrar ederek başlıyor) |
 | 19 | How do I sign in to Teams? | Cevap: email / password / sign in | 0.902 | To sign in to Microsoft Teams for Education, click Sign In and enter the email address and password provided by your institution. If your institution is already signed up for Office 365 or Microsoft 365 for Education and has turned on access to Microsoft Teams, or if your institution is an accredited academic institution, you will be able to sign in or sign up. If you are having trouble, please contact your institution's IT administrator. | 1.8 | ✅ | ✅ Doğru, kaynakla uyumlu |
 | 20 | Windows 11'e geçmeli miyim? | Cevap: hız / güvenlik / speed | 0.929 | Windows 11'e geçmek faydalı olabilir. Windows 11, Windows 10'a göre daha hızlı çalışır, daha güvenli ve yeni araçlar, sesler, uygulamalar ve erişilebilirlik özellikleri içerir. | 1.2 | ✅ | ✅ Doğru, kaynakla uyumlu |
 | 21 | Windows 10 uygulamalarım Windows 11'de çalışır mı? | Cevap: uyumlu / compatible / çalışır | 0.943 | Çoğu Windows 10 uygulaması Windows 11'de çalışır. Ancak, belirli bir uygulamanın veya cihazın uyumluluğunu doğrulamak için o uygulamanın üreticisinden kontrol etmeniz önerilir. | 1.2 | ✅ | ✅ Doğru |
@@ -36,7 +36,9 @@
 | 26 | Teams toplantısına en fazla kaç kişi katılabilir? | Reddedilmeli | 0.865 | Bu konuda bilgim yok. / I don't have that information. (ön kontrolde reddedildi) | 0.3 | ✅ | ✅ Doğru ret (ön kontrol) |
 | 27 | Microsoft 365 A3 lisansı kaç dolar? | Reddedilmeli | 0.874 | Bu konuda bilgim yok. / I don't have that information. (ön kontrolde reddedildi) | 0.3 | ✅ | ✅ Doğru ret (ön kontrol) |
 | 28 | TEKNOFEST ödülleri ne kadar? | Reddedilmeli | 0.902 | Bu konuda bilgim yok. / I don't have that information. (ön kontrolde reddedildi) | 0.3 | ✅ | ✅ Doğru ret (ön kontrol) |
-| 29 | Bitcoin fiyatı nedir? | Reddedilmeli | 0.790 | Bilgi tabanında yeterli bilgi yok. (eşikte reddedildi) | 0.0 | ✅ | ✅ Eşikte reddedildi |
-| 30 | What is the capital of France? | Reddedilmeli | 0.731 | Bilgi tabanında yeterli bilgi yok. (eşikte reddedildi) | 0.0 | ✅ | ✅ Eşikte reddedildi |
-| 31 | Bugün hava nasıl? | Reddedilmeli | 0.780 | Bilgi tabanında yeterli bilgi yok. (eşikte reddedildi) | 0.0 | ✅ | ✅ Eşikte reddedildi |
-| 32 | Python nedir? | Reddedilmeli | 0.779 | Bilgi tabanında yeterli bilgi yok. (eşikte reddedildi) | 0.0 | ✅ | ✅ Eşikte reddedildi |
+| 29 | Bitcoin fiyatı nedir? | Reddedilmeli | 0.790 | Bu konuda bilgim yok. / I don't have that information. (eşikte reddedildi) | 0.0 | ✅ | ✅ Eşikte reddedildi |
+| 30 | What is the capital of France? | Reddedilmeli | 0.731 | Bu konuda bilgim yok. / I don't have that information. (eşikte reddedildi) | 0.0 | ✅ | ✅ Eşikte reddedildi |
+| 31 | Bugün hava nasıl? | Reddedilmeli | 0.780 | Bu konuda bilgim yok. / I don't have that information. (eşikte reddedildi) | 0.0 | ✅ | ✅ Eşikte reddedildi |
+| 32 | Python nedir? | Reddedilmeli | 0.779 | Bu konuda bilgim yok. / I don't have that information. (eşikte reddedildi) | 0.0 | ✅ | ✅ Eşikte reddedildi |
+| 33 | Merhaba | Reddedilmeli | 0.764 | Bu konuda bilgim yok. / I don't have that information. (eşikte reddedildi) | 0.0 | ✅ | ✅ Eşikte reddedildi |
+| 34 | Bu nedir? | Reddedilmeli | 0.801 | Bu konuda bilgim yok. / I don't have that information. (eşikte reddedildi) | 0.0 | ✅ | ✅ Eşikte reddedildi (skor 0.801, eşik 0.82) |

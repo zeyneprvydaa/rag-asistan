@@ -5,7 +5,7 @@
 Üç grup var:
   A) Bilinen sorular (bazıları aliases_tr.txt içindeki ifadelerle aynı; skorlar biraz şişkin olabilir)
   B) Yeni ifadeler: takma adlarda OLMAYAN Türkçe sorular. Gerçek ölçü bu grup.
-  C) Bilgi tabanıyla ilgisiz sorular: eşikte reddedilmeli.
+  C) Bilgi tabanıyla ilgisiz ve çok genel sorular (kenar durumlar dahil): eşikte reddedilmeli.
 """
 import time
 
@@ -14,8 +14,8 @@ from sentence_transformers import SentenceTransformer
 from config import EMBED_MODEL_NAME, THRESHOLD
 from retriever import Retriever
 
-# (soru, beklenen kaydın ilk satırında geçen ifadelerden herhangi biri)
-GRUP_A = [
+# (question, any phrase expected in the first line of the right record)
+GROUP_A = [
     ("What is TEKNOFEST?", ("TEKNOFEST Aerospace and Technology Festival",)),
     ("TEKNOFEST nedir?", ("TEKNOFEST Aerospace and Technology Festival",)),
     ("Is there an admission fee for the festival?", ("admission fee",)),
@@ -34,7 +34,7 @@ GRUP_A = [
     ("Ulaşım ve konaklama desteği var mı?", ("material support",)),
 ]
 
-GRUP_B = [
+GROUP_B = [
     ("Takımlara para desteği var mı?", ("material support",)),
     ("Finale kalan takımlar için konaklama sağlanıyor mu?", ("material support",)),
     ("Projelere para yardımı yapılıyor mu?", ("material support",)),
@@ -54,7 +54,7 @@ GRUP_B = [
     ("OneDrive'ı kim kontrol eder?", ("OneDrive",)),
 ]
 
-GRUP_C = [
+GROUP_C = [
     "What is the capital of France?",
     "Bugün hava nasıl?",
     "Python nedir?",
@@ -62,53 +62,59 @@ GRUP_C = [
     "How do I bake a cake?",
     "En yakın pizzacı nerede?",
     "Fenerbahçe maçı kaç kaç bitti?",
+    # Edge cases: very general or content-free input
+    "Merhaba",
+    "Hello",
+    "Bu nedir?",
+    "???",
 ]
 
 
 def rank_of(results, keys):
+    """Return (rank, score) of the first record whose first line contains any key."""
     for i, (_, chunk, score) in enumerate(results, 1):
         if any(k.lower() in chunk.split("\n")[0].lower() for k in keys):
             return i, score
     return None, 0.0
 
 
-def run_answerable(r, grup, baslik):
-    print(f"\n--- {baslik} ---")
-    gecen = 0
-    for q, keys in grup:
+def run_answerable(r, group, title):
+    print(f"\n--- {title} ---")
+    passed = 0
+    for q, keys in group:
         t = time.perf_counter()
         results = r.search(q, k=len(r.chunks))
         ms = (time.perf_counter() - t) * 1000
         rank, score = rank_of(results, keys)
         top = results[0][2]
         ok = rank == 1 and score >= THRESHOLD
-        gecen += ok
+        passed += ok
         mark = "✓" if ok else "✗"
         print(f"{mark} {ms:4.0f}ms  beklenen sıra={rank}, skor={score:.3f}, top={top:.3f}  |  {q}")
-    print(f"Geçen: {gecen}/{len(grup)}")
-    return gecen, len(grup)
+    print(f"Geçen: {passed}/{len(group)}")
+    return passed, len(group)
 
 
-def run_refusals(r, sorular):
-    print("\n--- C) Bilgi tabanıyla ilgisiz sorular (reddedilmeli) ---")
-    gecen = 0
-    for q in sorular:
+def run_refusals(r, questions):
+    print("\n--- C) Bilgi tabanıyla ilgisiz ve çok genel sorular (reddedilmeli) ---")
+    passed = 0
+    for q in questions:
         top = r.search(q, k=1)[0][2]
         ok = top < THRESHOLD
-        gecen += ok
+        passed += ok
         print(f"{'✓' if ok else '✗'} top={top:.3f} (reddedilmeli)  |  {q}")
-    print(f"Geçen: {gecen}/{len(sorular)}")
-    return gecen, len(sorular)
+    print(f"Geçen: {passed}/{len(questions)}")
+    return passed, len(questions)
 
 
 def main():
     r = Retriever(SentenceTransformer(EMBED_MODEL_NAME))
-    a = run_answerable(r, GRUP_A, "A) Bilinen sorular")
-    b = run_answerable(r, GRUP_B, "B) Yeni ifadeler (takma adlarda yok)")
-    c = run_refusals(r, GRUP_C)
-    toplam = a[0] + b[0] + c[0]
-    sayi = a[1] + b[1] + c[1]
-    print(f"\nToplam: {toplam}/{sayi}  (eşik={THRESHOLD})")
+    a = run_answerable(r, GROUP_A, "A) Bilinen sorular")
+    b = run_answerable(r, GROUP_B, "B) Yeni ifadeler (takma adlarda yok)")
+    c = run_refusals(r, GROUP_C)
+    total = a[0] + b[0] + c[0]
+    count = a[1] + b[1] + c[1]
+    print(f"\nToplam: {total}/{count}  (eşik={THRESHOLD})")
 
 
 if __name__ == "__main__":
