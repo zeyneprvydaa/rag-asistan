@@ -11,12 +11,16 @@ Metinlerin hakları ilgili kuruluşlara aittir; yalnızca eğitim amaçlı proje
 
 Akış: kullanıcı sorusu → embedding → SQLite'tan en benzer kayıtlar → (gerekirse ön kontrol) → Foundry Local LLM → cevap
 
+## Dil kuralı
+
+Kod, dosya adları, değişkenler, veritabanı şeması ve kod yorumları İngilizce; kullanıcıya gösterilen mesajlar ve bu belge Türkçedir. Bilgi tabanı İngilizcedir, sorular iki dilde sorulabilir. "Bilgim yok" mesajı her durumda aynı ve iki dillidir: `Bu konuda bilgim yok. / I don't have that information.`
+
 ## Mimari
 
 | Katman | Kullanılan |
 |---|---|
 | Arayüz | Komut satırı (CLI) |
-| Veri katmanı | SQLite (`veritabani.db`, tablolar `dokumanlar` ve `takma_adlar`) |
+| Veri katmanı | SQLite (`knowledge.db`, tablolar `documents` ve `aliases`) |
 | Embedding | `intfloat/multilingual-e5-base` (Türkçe + İngilizce) |
 | LLM | Foundry Local, `qwen3.5-2b` |
 
@@ -43,8 +47,8 @@ Ayarlar:
 | `W_QUESTION` | `config.py` | 0.6 | Soru vektörünün ağırlığı |
 | `THRESHOLD` | `config.py` | 0.80 | Bu skorun altındaki kayıtlar kullanılmaz |
 | `TOP_K` | `config.py` | 3 | Aranan en fazla kayıt sayısı |
-| `SCORE_MARGIN` | `rag_asistan.py` | 0.03 | En iyi skordan bu kadar düşük kayıtlar LLM'e verilmez |
-| `USE_JUDGE` | `rag_asistan.py` | `True` | Sayı soran sorularda ön kontrol açık/kapalı |
+| `SCORE_MARGIN` | `assistant.py` | 0.03 | En iyi skordan bu kadar düşük kayıtlar LLM'e verilmez |
+| `USE_PRECHECK` | `assistant.py` | `True` | Sayı soran sorularda ön kontrol açık/kapalı |
 
 `W_QUESTION` ve `THRESHOLD` önce TEKNOFEST kaynağıyla 15 soruluk bir test setinde kalibre edildi. Yalnızca soru ya da yalnızca tüm metin kullanıldığında daha az soru doğru kayda eşleşti, karma yöntem en iyi sonucu verdi. İkinci kaynak ve Türkçe takma sorular eklendikten sonra değerler değiştirilmeden yeniden doğrulandı (aşağıdaki Değerlendirme bölümü).
 
@@ -63,9 +67,9 @@ Proje Windows'ta `foundry-local-sdk-winml` paketiyle geliştirildi. Başka işle
 ## Çalıştırma
 
 1. Dokümanları `source/` klasörüne `.txt` olarak koy. Kayıtlar boş satırla ayrılır; her kaydın ilk satırı soru, kalanı cevaptır. Dosyanın başında başlık ya da boş satır olmamalıdır. İstersen `aliases_tr.txt` dosyasına (proje ana klasörü, `source/` içi değil) o kayıtların Türkçe sorularını ekle.
-2. Veritabanını üret: `python adim3_parcala_kaydet.py` (eşleşmeyen takma ad anahtarları için `UYARI` yazar)
+2. Veritabanını üret: `python ingest.py` (eşleşmeyen takma ad anahtarları için `UYARI` yazar)
 3. İsteğe bağlı, arama kalitesini ölç: `python test_retrieval.py`
-4. Asistanı başlat: `python rag_asistan.py` (çıkış için `q`)
+4. Asistanı başlat: `python assistant.py` (çıkış için `q`)
 5. İsteğe bağlı, uçtan uca cevap testi: `python test_end_to_end.py`
 
 Doküman, takma ad dosyası ya da embedding modeli değişirse 2. adım yeniden çalıştırılmalıdır. Asistan ve uçtan uca test aynı anda çalıştırılmamalıdır, ikisi de Foundry Local oturumu açar.
@@ -76,14 +80,12 @@ Doküman, takma ad dosyası ya da embedding modeli değişirse 2. adım yeniden 
 |---|---|
 | `config.py` | Ortak ayarlar |
 | `aliases_tr.txt` | Kayıtların Türkçe soru varyantları (arama için) |
-| `adim3_parcala_kaydet.py` | Dokümanları parçalar, embed eder, takma adlarla birlikte SQLite'a yazar |
+| `ingest.py` | Dokümanları parçalar, embed eder, takma adlarla birlikte SQLite'a yazar (`python ingest.py`) |
 | `retriever.py` | Karma arama (İngilizce soru + Türkçe takma adlar + tam metin) |
-| `rag_asistan.py` | CLI asistanı (skor farkı filtresi, ön kontrol, cevap temizleme) |
+| `assistant.py` | CLI asistanı; tüm akış `respond()` fonksiyonundadır (skor farkı filtresi, ön kontrol, cevap temizleme) |
 | `test_retrieval.py` | Arama doğruluğu ve eşik testi |
-| `test_end_to_end.py` | Uçtan uca cevap değerlendirmesi, `degerlendirme.md` üretir |
-| `degerlendirme.md` | Uçtan uca test sonuçları |
-| `sweep_weights.py` | Arama ağırlığını (`W_QUESTION`) yeniden kalibre etmek için yardımcı script |
-| `list_models.py` | Foundry Local kataloğundaki modelleri listeler |
+| `test_end_to_end.py` | Uçtan uca cevap değerlendirmesi, `evaluation.md` üretir |
+| `evaluation.md` | Uçtan uca test sonuçları |
 | `test.py` | Foundry Local kurulum testi |
 
 ## Değerlendirme
@@ -106,7 +108,11 @@ Küçük hataların hepsi İngilizce kaynağın Türkçeye çevrilmesinden ya da
 
 Bir önceki sürümde (Türkçe takma adlar ve ön kontrol öncesi, 23 soru) 2 gerçek hata vardı: "Windows 11'e geçmeli miyim?" sorusunda kaynakta olmayan iddialar ve "TEKNOFEST'te kaç takım yarışır?" sorusunda uydurma yönlendirme. Her ikisi de bu sürümde düzeldi. Soru setleri aynı olmadığı için iki sonuç birebir karşılaştırılabilir değildir.
 
-Ayrıntılar `degerlendirme.md` dosyasındadır. Tablodaki "Otomatik" sütunu kaba bir anahtar kelime kontrolüdür ve bozuk çeviri içeren cevapları da geçmiş sayabilir; asıl ölçü "Elle değerlendirme" sütunudur.
+Ayrıntılar `evaluation.md` dosyasındadır. Tablodaki "Otomatik" sütunu kaba bir anahtar kelime kontrolüdür ve bozuk çeviri içeren cevapları da geçmiş sayabilir; asıl ölçü "Elle değerlendirme" sütunudur.
+
+## Kaynaklar ve referanslar
+
+Proje, Microsoft Tech Community'deki "Building Your First Local RAG Application with Foundry Local" yazısındaki mimariyi izler (https://techcommunity.microsoft.com/blog/azuredevcommunityblog/building-your-first-local-rag-application-with-foundry-local/4501968). Foundry Local kurulumu ve sohbet istemcisi için Microsoft Learn'deki Foundry Local başlangıç kılavuzu ile "Tutorial: Build a RAG application" eğitimi izlendi.
 
 ## Bilinen kısıtlar
 
@@ -115,4 +121,5 @@ Ayrıntılar `degerlendirme.md` dosyasındadır. Tablodaki "Otomatik" sütunu ka
 - **Dar eşik payı:** Konu dışı sorular ile cevaplanabilir sorular arasındaki skor farkı küçük. Eşiği düşürmek ya da çok sayıda yeni kayıt eklemek konu dışı soruların geçmesine yol açabilir; bu durumda eşik yeniden kalibre edilmelidir.
 - **Küçük LLM:** 2 milyar parametreli model İngilizce kaynak metinden Türkçe üretirken zaman zaman bozuk çeviri ya da cümle yapar, cevabı soruyu tekrarlayarak başlatabilir ve bazen Türkçe cevaba İngilizce ifadeler karıştırır. Bu yüzden her cevapla birlikte kaynak metin gösterilir, kullanıcı cevabı bununla karşılaştırabilir. Cevabı daha sıkı kurallarla kaynağa bağlamak denendi, ancak model bu durumda Türkçe yanıt yerine İngilizce kaynak cümlesini kopyaladı. Daha büyük model (4B) bu bilgisayarda cevap üretilmeden iptal edildiği için kullanılamadı.
 - **Ön kontrol kelime listesine bağlı:** Ön kontrol yalnızca "kaç", "en fazla", "ne kadar" gibi sayı/miktar sözcükleri geçen sorularda çalışır. Sayı sormayan ama cevabı bilgi tabanında olmayan, konuya yakın bir soru yine uydurma cevap alabilir. Ayrıca kısmi bilgi içeren kayıtlarda (örn. fiyat yerine "üç kademe var") soruyu fazla katı reddedebilir.
+- **Yalnızca Windows'ta denendi:** Foundry Local Windows, macOS ve Linux'u destekler, ama proje yalnızca Windows'ta (`foundry-local-sdk-winml`) çalıştırıldı. Model olarak 2B `qwen3.5-2b` kullanıldı; 4B model bu bilgisayarda çalışmadı.
 - **Brute-force arama:** Tüm kayıtlar bellekte taranır; bu boyutta sorun yok, binlerce kayıtta yavaşlar.
