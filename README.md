@@ -9,18 +9,18 @@ Bilgi tabanı olarak iki sık sorulan sorular kaynağı kullanılır:
 
 Metinlerin hakları ilgili kuruluşlara aittir; yalnızca eğitim amaçlı proje kapsamında kullanılmıştır.
 
-Akış: kullanıcı sorusu → embedding → SQLite'tan en benzer kayıtlar → Foundry Local LLM → cevap
+Akış: kullanıcı sorusu → embedding → SQLite'tan en benzer kayıtlar → (gerekirse ön kontrol) → Foundry Local LLM → cevap
 
 ## Mimari
 
 | Katman | Kullanılan |
 |---|---|
 | Arayüz | Komut satırı (CLI) |
-| Veri katmanı | SQLite (`veritabani.db`, tablo `dokumanlar`) |
+| Veri katmanı | SQLite (`veritabani.db`, tablolar `dokumanlar` ve `takma_adlar`) |
 | Embedding | `intfloat/multilingual-e5-base` (Türkçe + İngilizce) |
 | LLM | Foundry Local, `qwen3.5-2b` |
 
-Asistan soruyla aynı dilde cevap verir (Türkçe soruya Türkçe, İngilizce soruya İngilizce). Her cevabın altında cevabın dayandığı kaynak metinler gösterilir.
+Asistan genellikle soruyla aynı dilde cevap verir (Türkçe soruya Türkçe, İngilizce soruya İngilizce). Her cevabın altında cevabın dayandığı kaynak metin gösterilir.
 
 ## Arama yöntemi
 
@@ -28,17 +28,25 @@ Her kayıt iki vektörle saklanır: tüm metin (soru + cevap) ve yalnızca soru 
 
 `skor = W_QUESTION × soru_benzerliği + (1 - W_QUESTION) × tüm_metin_benzerliği`
 
-Ayarlar `config.py` içindedir:
+**Türkçe takma sorular.** Bilgi tabanı İngilizce olduğu için Türkçe sorular İngilizce soru satırıyla doğrudan karşılaştırıldığında skor düşük kalıyordu (örn. "A1, A3 ve A5 arasındaki fark nedir?" 0.764 ile eşiğin altında kalıp reddediliyordu). Bunun için `aliases_tr.txt` dosyasında her kaydın cevapladığı Türkçe sorular elle yazıldı (40 kayıt, 67 Türkçe soru). Aramada "soru benzerliği" olarak, İngilizce soru satırı ile o kaydın Türkçe takma sorularından en yüksek olanı kullanılır. Kaynak metinler değiştirilmez, cevaplar hep orijinal İngilizce metinden üretilir.
 
-| Ayar | Değer | Anlamı |
-|---|---|---|
-| `W_QUESTION` | 0.6 | Soru vektörünün ağırlığı |
-| `THRESHOLD` | 0.80 | Bu skorun altındaki kayıtlar kullanılmaz |
-| `TOP_K` | 3 | LLM'e verilen en fazla kayıt sayısı |
+Aynı dosya biçimi: `İngilizce soru (kaydın ilk satırı, birebir) || Türkçe soru 1 || Türkçe soru 2 ...`
 
-Bu değerler önce TEKNOFEST kaynağıyla 15 soruluk bir test setinde (10 cevaplanabilir, 5 konu dışı soru) kalibre edildi. Yalnızca soru ya da yalnızca tüm metin kullanıldığında daha az soru doğru kayda eşleşti, karma yöntem en iyi sonucu verdi.
+**Skor farkı filtresi.** Eşiği geçen kayıtlardan yalnızca en iyi skordan en fazla `SCORE_MARGIN` (0.03) düşük olanlar LLM'e verilir. Konuyla alakalı ikinci bir kayıt verildiğinde 2B model cevabı karıştırıyordu.
 
-İkinci kaynak eklendikten sonra (toplam 40 kayıt) 23 soruluk arama testinde (18 cevaplanabilir, 5 konu dışı) ayarlar yeniden değiştirilmeden doğrulandı: 22 soruda doğru kayıt 1. sırada geldi, konu dışı soruların hepsi reddedildi. Tek istisna Türkçe bir TEKNOFEST sorusu ("TEKNOFEST'e giriş ücretli mi?"), doğru kayıt 3. sırada çıktı. `TOP_K = 3` sayesinde bu kayıt yine de modele ulaşır.
+**Ön kontrol.** Sayı ya da miktar soran sorularda ("kaç", "en fazla", "ne kadar", "how many" vb.) LLM'e önce "bu kayıt sorulan bilgiyi doğrudan içeriyor mu?" diye sorulur; cevap hayırsa asistan "bilgim yok" der. Bu kontrol, konusu bilgi tabanında olan ama sayısı olmayan sorularda ("TEKNOFEST'te kaç takım yarışır?") uydurma cevabı engellemek için eklendi. Her soruda çalıştırıldığında doğru soruları da reddettiği için yalnızca bu tür sorularda çalışır.
+
+Ayarlar:
+
+| Ayar | Yer | Değer | Anlamı |
+|---|---|---|---|
+| `W_QUESTION` | `config.py` | 0.6 | Soru vektörünün ağırlığı |
+| `THRESHOLD` | `config.py` | 0.80 | Bu skorun altındaki kayıtlar kullanılmaz |
+| `TOP_K` | `config.py` | 3 | Aranan en fazla kayıt sayısı |
+| `SCORE_MARGIN` | `rag_asistan.py` | 0.03 | En iyi skordan bu kadar düşük kayıtlar LLM'e verilmez |
+| `USE_JUDGE` | `rag_asistan.py` | `True` | Sayı soran sorularda ön kontrol açık/kapalı |
+
+`W_QUESTION` ve `THRESHOLD` önce TEKNOFEST kaynağıyla 15 soruluk bir test setinde kalibre edildi. Yalnızca soru ya da yalnızca tüm metin kullanıldığında daha az soru doğru kayda eşleşti, karma yöntem en iyi sonucu verdi. İkinci kaynak ve Türkçe takma sorular eklendikten sonra değerler değiştirilmeden yeniden doğrulandı (aşağıdaki Değerlendirme bölümü).
 
 ## Kurulum
 
@@ -54,22 +62,23 @@ Proje Windows'ta `foundry-local-sdk-winml` paketiyle geliştirildi. Başka işle
 
 ## Çalıştırma
 
-1. Dokümanları `source/` klasörüne `.txt` olarak koy. Kayıtlar boş satırla ayrılır; her kaydın ilk satırı soru, kalanı cevaptır. Dosyanın başında başlık ya da boş satır olmamalıdır.
-2. Veritabanını üret: `python adim3_parcala_kaydet.py`
+1. Dokümanları `source/` klasörüne `.txt` olarak koy. Kayıtlar boş satırla ayrılır; her kaydın ilk satırı soru, kalanı cevaptır. Dosyanın başında başlık ya da boş satır olmamalıdır. İstersen `aliases_tr.txt` dosyasına (proje ana klasörü, `source/` içi değil) o kayıtların Türkçe sorularını ekle.
+2. Veritabanını üret: `python adim3_parcala_kaydet.py` (eşleşmeyen takma ad anahtarları için `UYARI` yazar)
 3. İsteğe bağlı, arama kalitesini ölç: `python test_retrieval.py`
 4. Asistanı başlat: `python rag_asistan.py` (çıkış için `q`)
 5. İsteğe bağlı, uçtan uca cevap testi: `python test_end_to_end.py`
 
-Doküman ya da embedding modeli değişirse 2. adım yeniden çalıştırılmalıdır. Asistan ve testler aynı anda çalıştırılmamalıdır, ikisi de Foundry Local oturumu açar.
+Doküman, takma ad dosyası ya da embedding modeli değişirse 2. adım yeniden çalıştırılmalıdır. Asistan ve uçtan uca test aynı anda çalıştırılmamalıdır, ikisi de Foundry Local oturumu açar.
 
 ## Dosyalar
 
 | Dosya | Görevi |
 |---|---|
 | `config.py` | Ortak ayarlar |
-| `adim3_parcala_kaydet.py` | Dokümanları parçalar, embed eder, SQLite'a yazar |
-| `retriever.py` | Karma arama |
-| `rag_asistan.py` | CLI asistanı |
+| `aliases_tr.txt` | Kayıtların Türkçe soru varyantları (arama için) |
+| `adim3_parcala_kaydet.py` | Dokümanları parçalar, embed eder, takma adlarla birlikte SQLite'a yazar |
+| `retriever.py` | Karma arama (İngilizce soru + Türkçe takma adlar + tam metin) |
+| `rag_asistan.py` | CLI asistanı (skor farkı filtresi, ön kontrol, cevap temizleme) |
 | `test_retrieval.py` | Arama doğruluğu ve eşik testi |
 | `test_end_to_end.py` | Uçtan uca cevap değerlendirmesi, `degerlendirme.md` üretir |
 | `degerlendirme.md` | Uçtan uca test sonuçları |
@@ -79,19 +88,31 @@ Doküman ya da embedding modeli değişirse 2. adım yeniden çalıştırılmal�
 
 ## Değerlendirme
 
-23 soruluk uçtan uca testte (TEKNOFEST ve Microsoft kaynakları, Türkçe ve İngilizce, konu dışı ve cevabı bilgi tabanında olmayan sorular) cevaplar elle okunarak değerlendirildi: 16 doğru, 5 küçük hata, 2 gerçek hata. Ortalama cevap süresi 0.9 saniyedir. İngilizce sorulara verilen cevapların hepsi doğruydu; hatalar Türkçe cevaplarda, İngilizce kaynağın çevrilmesi sırasında çıktı.
+### Arama testi (`test_retrieval.py`): 39/40
 
-İki gerçek hata:
+| Grup | Sonuç | Açıklama |
+|---|---|---|
+| A. Bilinen sorular | 16/16 | Bir kısmı `aliases_tr.txt` içindeki ifadelerle aynı, skorlar şişkin olabilir |
+| B. Yeni ifadeler | 16/17 | Takma adlarda olmayan Türkçe sorular. Asıl ölçü bu grup |
+| C. Konu dışı sorular | 7/7 | Hepsi eşikte reddedildi |
 
-- Tavsiye isteyen bir soruda ("Windows 11'e geçmeli miyim?") kaynakta olmayan iddialar.
-- Konusu bilgi tabanında olan ama cevabı olmayan bir soruda ("TEKNOFEST'te kaç takım yarışır?") reddetmek yerine uydurma yönlendirme.
+Grup B'deki tek hata: "TEKNOFEST ne amaçla düzenleniyor?" doğru kaydı 2. sırada buldu (0.931, 1. kayıt 0.935). Konu dışı soruların en yükseği 0.790 ("Bitcoin fiyatı nedir?"), eşik 0.80: aradaki pay dar.
 
-Ayrıntılar `degerlendirme.md` dosyasındadır. Test `python test_end_to_end.py` ile yeniden üretilebilir. Tablodaki "Otomatik" sütunu kaba bir anahtar kelime kontrolüdür ve bozuk çeviri içeren cevapları da geçmiş sayabilir; asıl ölçü "Elle değerlendirme" sütunudur.
+### Uçtan uca test (`test_end_to_end.py`): 32 soru
+
+Cevaplar elle okunarak değerlendirildi: 14 doğru, 9 küçük hata, 0 gerçek hata. Cevabı bilgi tabanında olmayan ya da konu dışı 9 sorunun 9'u doğru şekilde reddedildi. Ortalama cevap süresi 0.8 saniyedir.
+
+Küçük hataların hepsi İngilizce kaynağın Türkçeye çevrilmesinden ya da cevap biçiminden gelir: bozuk çeviri ("environment" yerine "çeviklik", "accommodation" yerine "kahramanluk"), cevabın soruyu tekrarlayarak başlaması, Türkçe-İngilizce karışık cümleler. Bir soruda ("Microsoft 365 Education kaç para?") ön kontrol, kayıtta "üç kademe var, fiyat için satış ortağına başvurun" bilgisi olmasına rağmen soruyu reddetti.
+
+Bir önceki sürümde (Türkçe takma adlar ve ön kontrol öncesi, 23 soru) 2 gerçek hata vardı: "Windows 11'e geçmeli miyim?" sorusunda kaynakta olmayan iddialar ve "TEKNOFEST'te kaç takım yarışır?" sorusunda uydurma yönlendirme. Her ikisi de bu sürümde düzeldi. Soru setleri aynı olmadığı için iki sonuç birebir karşılaştırılabilir değildir.
+
+Ayrıntılar `degerlendirme.md` dosyasındadır. Tablodaki "Otomatik" sütunu kaba bir anahtar kelime kontrolüdür ve bozuk çeviri içeren cevapları da geçmiş sayabilir; asıl ölçü "Elle değerlendirme" sütunudur.
 
 ## Bilinen kısıtlar
 
 - **Küçük bilgi tabanı:** İki kaynak, toplam 40 soru-cevap kaydı. Arama yöntemi soru-cevap formatına göre ayarlandı; düz paragraf içeren dokümanlarda ayrıca test edilmeli.
-- **Türkçe sorularda arama:** Bilgi tabanı İngilizce olduğu için bazı Türkçe sorularda doğru kayıt 1. sırada gelmeyebilir (örn. "TEKNOFEST'e giriş ücretli mi?" sorusunda 3. sırada). `TOP_K = 3` bunu telafi eder, ama LLM'in doğru kaydı seçmesine bağlıdır.
-- **Küçük LLM:** 2 milyar parametreli model soruyla aynı dilde cevap verir, ama İngilizce kaynak metinden Türkçe üretirken zaman zaman ufak anlam kaymaları ve bozuk cümleler çıkabilir (örn. "institutions" yerine "eğitimciler" demek). Tavsiye isteyen sorularda kaynaklarda yazmayan ayrıntı da ekleyebilir. Bu yüzden her cevapla birlikte kullanılan kaynak metinler gösterilir, kullanıcı cevabı bunlarla karşılaştırabilir. Cevabı daha sıkı kurallarla kaynağa bağlamak denendi, ancak model bu durumda Türkçe yanıt yerine İngilizce kaynak cümlesini kopyaladı. Daha büyük model (4B) bu bilgisayarda cevap üretilmeden iptal edildiği için denenemedi.
-- **Eşik sınırı:** Eşik yalnızca konu dışı soruları eler. Konuyla ilgili ama cevabı bilgi tabanında olmayan sorularda ret kararını LLM verir ve bu her zaman doğru çıkmaz.
+- **Takma adlar elle yazılır:** Yeni bir kayıt eklendiğinde Türkçe sorularının `aliases_tr.txt` içine eklenmesi gerekir; eklenmezse kayıt yine bulunur, ama Türkçe sorularda skoru daha düşük çıkabilir. Takma ad sayısı arttıkça konu dışı sorular da eşiğe biraz yaklaşabilir (örn. "Bitcoin fiyatı nedir?" 0.755'ten 0.790'a çıktı).
+- **Dar eşik payı:** Konu dışı sorular ile cevaplanabilir sorular arasındaki skor farkı küçük. Eşiği düşürmek ya da çok sayıda yeni kayıt eklemek konu dışı soruların geçmesine yol açabilir; bu durumda eşik yeniden kalibre edilmelidir.
+- **Küçük LLM:** 2 milyar parametreli model İngilizce kaynak metinden Türkçe üretirken zaman zaman bozuk çeviri ya da cümle yapar, cevabı soruyu tekrarlayarak başlatabilir ve bazen Türkçe cevaba İngilizce ifadeler karıştırır. Bu yüzden her cevapla birlikte kaynak metin gösterilir, kullanıcı cevabı bununla karşılaştırabilir. Cevabı daha sıkı kurallarla kaynağa bağlamak denendi, ancak model bu durumda Türkçe yanıt yerine İngilizce kaynak cümlesini kopyaladı. Daha büyük model (4B) bu bilgisayarda cevap üretilmeden iptal edildiği için kullanılamadı.
+- **Ön kontrol kelime listesine bağlı:** Ön kontrol yalnızca "kaç", "en fazla", "ne kadar" gibi sayı/miktar sözcükleri geçen sorularda çalışır. Sayı sormayan ama cevabı bilgi tabanında olmayan, konuya yakın bir soru yine uydurma cevap alabilir. Ayrıca kısmi bilgi içeren kayıtlarda (örn. fiyat yerine "üç kademe var") soruyu fazla katı reddedebilir.
 - **Brute-force arama:** Tüm kayıtlar bellekte taranır; bu boyutta sorun yok, binlerce kayıtta yavaşlar.
