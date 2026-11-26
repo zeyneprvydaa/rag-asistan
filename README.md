@@ -70,6 +70,6 @@ Doküman ya da embedding modeli değişirse 2. adım yeniden çalıştırılmal�
 
 - **Küçük bilgi tabanı:** İki kaynak, toplam 40 soru-cevap kaydı. Arama yöntemi soru-cevap formatına göre ayarlandı; düz paragraf içeren dokümanlarda ayrıca test edilmeli.
 - **Türkçe sorularda arama:** Bilgi tabanı İngilizce olduğu için bazı Türkçe sorularda doğru kayıt 1. sırada gelmeyebilir (örn. "TEKNOFEST'e giriş ücretli mi?" sorusunda 3. sırada). `TOP_K = 3` bunu telafi eder, ama LLM'in doğru kaydı seçmesine bağlıdır.
-- **Küçük LLM:** 2 milyar parametreli model cevaplarda zaman zaman tutarsız olabilir (örn. cevabın başına gereksiz "Yes" eklemesi; kod bunu temizler).
+- **Küçük LLM:** 2 milyar parametreli model cevaplarda tutarsız olabilir. Türkçe sorulara bazen İngilizce kaynak cümlesini kopyalayarak cevap verir, tavsiye isteyen sorularda ("Windows 11'e geçmeli miyim?") kaynaklarda yazmayan ayrıntı ekleyebilir. Bu yüzden her cevapla birlikte kullanılan kaynak metinler de gösterilir, kullanıcı cevabı bu metinlerle karşılaştırabilir. Daha büyük model (4B) bu bilgisayarda cevap üretmeden iptal edildiği için denenemedi.
 - **Eşik sınırı:** Eşik yalnızca konu dışı soruları eler. Konuyla ilgili ama cevabı bilgi tabanında olmayan sorularda ret kararını LLM verir.
 - **Brute-force arama:** Tüm kayıtlar bellekte taranır; bu boyutta sorun yok, binlerce kayıtta yavaşlar.
