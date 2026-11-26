@@ -1,6 +1,6 @@
 .venv/
 __pycache__/
 *.pyc
-veritabani.db
+knowledge.db
 .env
 .vscode/

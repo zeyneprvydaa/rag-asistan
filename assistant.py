@@ -1,5 +1,9 @@
-"""RAG asistanı: top-K retrieval + Foundry Local LLM (CLI)."""
+"""CLI RAG assistant: retrieval + Foundry Local LLM.
+
+Run:  python assistant.py   (type 'q' to quit)
+"""
 import re
+from collections import namedtuple
 
 from foundry_local_sdk import Configuration, FoundryLocalManager
 from sentence_transformers import SentenceTransformer
@@ -7,14 +11,18 @@ from sentence_transformers import SentenceTransformer
 from config import EMBED_MODEL_NAME, LLM_ALIAS, THRESHOLD
 from retriever import Retriever
 
-# En iyi skordan bu kadar veya daha fazla düşük kayıtlar LLM'e verilmez
+# Records scoring more than this below the best one are not given to the LLM
 SCORE_MARGIN = 0.03
-# Cevap üretmeden önce "bu kayıt soruyu gerçekten cevaplıyor mu?" kontrolü
-USE_JUDGE = True
-# Ön kontrol sadece sayı/miktar soran sorularda çalışır (uydurma en çok burada çıkıyor)
-QUANTITY_WORDS = ("kaç", "en fazla", "en az", "ne kadar", "how many", "how much", "maximum", "minimum", "limit")
+# Before answering a question that asks for a number or amount, ask the LLM whether the
+# best record really contains it (prevents made-up figures on near-topic questions)
+USE_PRECHECK = True
+QUANTITY_WORDS = (
+    "kaç", "en fazla", "en az", "ne kadar",
+    "how many", "how much", "maximum", "minimum", "limit",
+)
 
 NO_ANSWER = "NO_ANSWER"
+# One refusal message for every case, in both languages
 NO_ANSWER_MSG = "Bu konuda bilgim yok. / I don't have that information."
 
 SYSTEM_PROMPT = (
@@ -26,7 +34,7 @@ SYSTEM_PROMPT = (
     f"If no entry answers the question, reply with exactly {NO_ANSWER} and nothing else."
 )
 
-JUDGE_PROMPT = (
+PRECHECK_PROMPT = (
     "You check whether an FAQ entry answers a user's question. "
     "Reply NO only if the A: line is about the same topic but is missing the specific fact the question asks for "
     "(for example the question asks for a number, date, price or limit that is not in the A: line). "
@@ -35,8 +43,12 @@ JUDGE_PROMPT = (
     "Reply with one word: YES or NO."
 )
 
+# status: "answered", "threshold" (score too low), "precheck" (pre-check said no), "error"
+Response = namedtuple("Response", "top_score reply hits status")
+
 
 def load_llm():
+    # Keep this name: Foundry Local stores its model cache under the app name
     FoundryLocalManager.initialize(Configuration(app_name="rag_asistan"))
     manager = FoundryLocalManager.instance
     manager.download_and_register_eps()
@@ -48,67 +60,88 @@ def load_llm():
 
 
 def format_chunk(chunk):
-    """İlk satırı soru, kalanı cevap olarak etiketler."""
+    """Label the first line as the question and the rest as the answer."""
     parts = chunk.split("\n", 1)
     if len(parts) == 2:
         return f"Q: {parts[0]}\nA: {parts[1]}"
     return chunk
 
 
-def _norm(s):
-    return " ".join(s.split()).lower()
+def _norm(text):
+    return " ".join(text.split()).lower()
 
 
-def clean_answer(out, hits):
-    # <think> bloğunu temizle (Qwen3 ailesi)
-    text = re.sub(r"<think>.*?</think>", "", out, flags=re.S).strip()
-    # Model cevap + NO_ANSWER karışık yazarsa kelimeyi at, cevabı koru
+def clean_answer(raw, hits):
+    """Fix the typical slips of a small model before showing the answer."""
+    # Drop the <think> block (Qwen3 family)
+    text = re.sub(r"<think>.*?</think>", "", raw, flags=re.S).strip()
+    # If the model mixed an answer with NO_ANSWER, keep the answer
     text = text.replace(NO_ANSWER, "").strip()
-    # Kaynak etiketlerini kopyalarsa baştaki "Q: ..." / "A:" satırlarını at
+    # Drop copied "Q: ..." lines and an "A:" label
     lines = text.split("\n")
     while lines and re.match(r"^\s*Q:", lines[0]):
         lines.pop(0)
     text = "\n".join(lines).strip()
     text = re.sub(r"^\s*A:\s*", "", text)
-    # Baştaki Yes/No/Evet/Hayır'ı at
+    # Drop a leading Yes/No/Evet/Hayır
     text = re.sub(r"^(yes|no|evet|hayır|hayir)[,.!]?\s+", "", text, flags=re.I)
 
-    # Kaynak metni aynen kopyalanmış paragrafları at (başka paragraf kaldıysa)
-    kaynak = _norm(" ".join(c for _, c, _ in hits))
-    paragraflar = [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
-    kalan = [p for p in paragraflar if _norm(p) not in kaynak]
-    if kalan:
-        text = "\n\n".join(kalan)
+    # Drop paragraphs copied verbatim from the source when another paragraph remains
+    source_text = _norm(" ".join(chunk for _, chunk, _ in hits))
+    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
+    remaining = [p for p in paragraphs if _norm(p) not in source_text]
+    if remaining:
+        text = "\n\n".join(remaining)
 
     if not text:
         return NO_ANSWER_MSG
     return text[0].upper() + text[1:]
 
 
-def needs_check(question):
+def needs_precheck(question):
     q = question.lower()
-    return any(w in q for w in QUANTITY_WORDS)
+    return any(word in q for word in QUANTITY_WORDS)
 
 
-def chunk_answers(client, question, chunk):
-    """LLM'e 'bu kayıt soruyu doğrudan cevaplıyor mu?' diye sorar."""
+def entry_answers_question(client, question, chunk):
+    """Ask the LLM whether the record directly contains what the question asks for."""
     messages = [
-        {"role": "system", "content": JUDGE_PROMPT},
+        {"role": "system", "content": PRECHECK_PROMPT},
         {"role": "user", "content": f"{format_chunk(chunk)}\n\nUser question: {question}"},
     ]
     out = client.complete_chat(messages).choices[0].message.content
     out = re.sub(r"<think>.*?</think>", "", out, flags=re.S).strip().upper()
-    return not out.startswith("NO") and not out.startswith("HAYIR")
+    return not (out.startswith("NO") or out.startswith("HAYIR"))
 
 
-def answer(client, question, hits):
+def generate_answer(client, question, hits):
     context = "\n\n".join(f"[Source: {s}]\n{format_chunk(c)}" for s, c, _ in hits)
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": f"FAQ entry:\n{context}\n\nUser question: {question}"},
     ]
-    out = client.complete_chat(messages).choices[0].message.content
-    return clean_answer(out, hits)
+    raw = client.complete_chat(messages).choices[0].message.content
+    return clean_answer(raw, hits)
+
+
+def respond(retriever, client, question):
+    """The whole pipeline for one question. Shared by the CLI and the end-to-end test."""
+    results = retriever.search(question)
+    top_score = results[0][2]
+
+    hits = [h for h in results if h[2] >= THRESHOLD]
+    if not hits:
+        return Response(top_score, NO_ANSWER_MSG, [], "threshold")
+
+    # Keep only records close to the best one so unrelated ones do not confuse the LLM
+    hits = [h for h in hits if h[2] >= hits[0][2] - SCORE_MARGIN]
+
+    try:
+        if USE_PRECHECK and needs_precheck(question) and not entry_answers_question(client, question, hits[0][1]):
+            return Response(top_score, NO_ANSWER_MSG, hits, "precheck")
+        return Response(top_score, generate_answer(client, question, hits), hits, "answered")
+    except Exception as e:  # e.g. the model run was cancelled
+        return Response(top_score, f"Cevap üretilemedi ({e})", hits, "error")
 
 
 def main():
@@ -122,36 +155,23 @@ def main():
 
     try:
         while True:
-            q = input("Soru: ").strip()
-            if q.lower() == "q":
+            question = input("Soru: ").strip()
+            if question.lower() == "q":
                 break
-            if not q:
+            if not question:
                 continue
 
-            results = retriever.search(q)
-            print(f"[En iyi eşleşme skoru: {results[0][2] * 100:.1f}%]")
-            hits = [h for h in results if h[2] >= THRESHOLD]
-            if not hits:
-                print("Bilgi tabanında yeterli bilgi yok.\n")
-                continue
+            result = respond(retriever, client, question)
+            print(f"[En iyi eşleşme skoru: {result.top_score * 100:.1f}%]")
+            for source, chunk, score in result.hits:
+                print(f"  -> ({source}, {score:.3f}) {chunk.splitlines()[0]}")
 
-            # En iyi skora çok uzak kayıtları ele (LLM'i şaşırtmasınlar)
-            hits = [h for h in hits if h[2] >= hits[0][2] - SCORE_MARGIN]
-
-            for s, c, sc in hits:
-                print(f"  -> ({s}, {sc:.3f}) {c.splitlines()[0]}")
-
-            try:
-                if USE_JUDGE and needs_check(q) and not chunk_answers(client, q, hits[0][1]):
-                    print(f"\nCevap: {NO_ANSWER_MSG}")
-                    print("(Ön kontrol: en iyi kayıt soruyu doğrudan cevaplamıyor)\n")
-                    continue
-                cevap = answer(client, q, hits)
-            except Exception as e:
-                cevap = f"Cevap üretilemedi ({e})"
-            print(f"\nCevap: {cevap}")
-            for _, c, sc in hits:
-                print(f"Kaynak ({sc:.3f}): {c.split(chr(10), 1)[-1]}")
+            print(f"\nCevap: {result.reply}")
+            if result.status == "precheck":
+                print("(Ön kontrol: en iyi kayıt sorulan bilgiyi doğrudan içermiyor)")
+            elif result.status == "answered":
+                for _, chunk, score in result.hits:
+                    print(f"Kaynak ({score:.3f}): {chunk.split(chr(10), 1)[-1]}")
             print()
     except (KeyboardInterrupt, EOFError):
         print()
