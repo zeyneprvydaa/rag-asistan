@@ -102,7 +102,7 @@ Grup B'deki tek hata: "TEKNOFEST ne amaçla düzenleniyor?" doğru kaydı 2. sı
 
 ### Uçtan uca test (`test_end_to_end.py`): 32 soru
 
-Cevaplar elle okunarak değerlendirildi: 14 doğru, 9 küçük hata, 0 gerçek hata. Cevabı bilgi tabanında olmayan ya da konu dışı 9 sorunun 9'u doğru şekilde reddedildi. Ortalama cevap süresi 0.8 saniyedir.
+Cevaplar elle okunarak değerlendirildi: 14 doğru, 9 küçük hata, 0 gerçek hata. Cevabı bilgi tabanında olmayan ya da konu dışı 9 sorunun 9'u doğru şekilde reddedildi. Ortalama cevap süresi 0.7 saniyedir.
 
 Küçük hataların hepsi İngilizce kaynağın Türkçeye çevrilmesinden ya da cevap biçiminden gelir: bozuk çeviri ("environment" yerine "çeviklik", "accommodation" yerine "kahramanluk"), cevabın soruyu tekrarlayarak başlaması, Türkçe-İngilizce karışık cümleler. Bir soruda ("Microsoft 365 Education kaç para?") ön kontrol, kayıtta "üç kademe var, fiyat için satış ortağına başvurun" bilgisi olmasına rağmen soruyu reddetti.
 
