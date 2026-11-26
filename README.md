@@ -5,7 +5,7 @@
 Bilgi tabanı olarak iki sık sorulan sorular kaynağı kullanılır:
 
 - `source/teknofest_faq.txt`: TEKNOFEST (kaynak:https://teknofest.org/tr/kurumsal/sss/, Kasım 2026)
-- `source/microsoft_sss_ing.txt`: Microsoft 365 Education (kaynak:https://www.microsoft.com/en/education/products/frequently-asked-questions, Kasım 2026)
+- `source/microsoft_faq.txt`: Microsoft 365 Education (kaynak:https://www.microsoft.com/en/education/products/frequently-asked-questions, Kasım 2026)
 
 Akış: kullanıcı sorusu → embedding → SQLite'tan en benzer kayıtlar → Foundry Local LLM → cevap
 
@@ -32,7 +32,7 @@ Ayarlar `config.py` içindedir:
 | `THRESHOLD` | 0.80 | Bu skorun altındaki kayıtlar kullanılmaz |
 | `TOP_K` | 3 | LLM'e verilen en fazla kayıt sayısı |
 
-Bu değerler küçük bir test setiyle (10 cevaplanabilir, 5 konu dışı soru) kalibre edildi. Her biri tek başına denendiğinde (yalnızca soru ya da yalnızca tüm metin) daha az soruyu doğru kayda eşledi, karma yöntem en iyi sonucu verdi.
+Bu değerler 15 soruluk bir test setiyle (10 cevaplanabilir, 5 konu dışı soru) kalibre edildi. İkinci kaynak eklendikten sonra 23 soruluk genişletilmiş sette (18 cevaplanabilir, 5 konu dışı) doğrulandı: 22 soruda doğru kayıt 1. sırada geldi, konu dışı soruların hepsi reddedildi. Tek istisna Türkçe bir TEKNOFEST sorusu, doğru kayıt 3. sırada çıktı.
 
 ## Kurulum
 
